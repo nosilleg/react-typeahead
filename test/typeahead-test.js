@@ -57,10 +57,10 @@ describe('Typeahead Component', function() {
         'xxx': 0
       };
 
-      _.each(testplan, function(expected, value) {
+      _.forOwn(testplan, function(expected, value) {
         var results = simulateTextInput(this.component, value);
         assert.equal(results.length, expected, 'Text input: ' + value);
-      }, this);
+      }.bind(this));
     });
 
     it('does not change the url hash when clicking on options', function() {

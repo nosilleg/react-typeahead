@@ -9,13 +9,13 @@ var TypeaheadSelector = require('../src/typeahead/selector');
 var Tokenizer = require('../src/tokenizer');
 var Token = require('../src/tokenizer/token');
 var Keyevent = require('../src/keyevent');
-var TestUtils = require('react-addons-test-utils');
+var ReactTestUtils = require('react-addons-test-utils');
 
 function simulateTextInput(component, value) {
   var node = component.refs.entry;
   node.value = value;
-  TestUtils.Simulate.change(node);
-  return TestUtils.scryRenderedComponentsWithType(component, TypeaheadOption);
+  ReactTestUtils.Simulate.change(node);
+  return ReactTestUtils.scryRenderedComponentsWithType(component, TypeaheadOption);
 }
 
 function simulateTokenInput(component, value) {
@@ -24,7 +24,7 @@ function simulateTokenInput(component, value) {
 }
 
 function getTokens(component) {
-  return TestUtils.scryRenderedComponentsWithType(component, Token);
+  return ReactTestUtils.scryRenderedComponentsWithType(component, Token);
 }
 
 
@@ -54,7 +54,7 @@ describe('TypeaheadTokenizer Component', function() {
 
   describe('basic tokenizer', function() {
     beforeEach(function() {
-      this.component = TestUtils.renderIntoDocument(
+      this.component = ReactTestUtils.renderIntoDocument(
         <Tokenizer
           options={BEATLES}
           customClasses={{
@@ -74,83 +74,93 @@ describe('TypeaheadTokenizer Component', function() {
         'xxx': 0
       };
 
-      _.each(testplan, function(expected, value) {
+      _.forOwn(testplan, function(expected, value) {
         var results = simulateTokenInput(this.component, value);
         assert.equal(results.length, expected, 'Text input: ' + value);
-      }, this);
+      }.bind(this));
     });
 
     it('should have custom and default token classes', function() {
       simulateTokenInput(this.component, 'o');
       var entry = this.component.refs.typeahead.refs.entry;
-      TestUtils.Simulate.keyDown(entry, { keyCode: Keyevent.DOM_VK_DOWN });
-      TestUtils.Simulate.keyDown(entry, { keyCode: Keyevent.DOM_VK_RETURN });
+      ReactTestUtils.Simulate.keyDown(entry, { keyCode: Keyevent.DOM_VK_DOWN });
+      ReactTestUtils.Simulate.keyDown(entry, { keyCode: Keyevent.DOM_VK_RETURN });
 
       var tokens = getTokens(this.component);
       assert.equal(tokens.length, 1);
       assert.isDefined(tokens[0]);
 
-      TestUtils.findRenderedDOMComponentWithClass(tokens[0], 'typeahead-token');
-      TestUtils.findRenderedDOMComponentWithClass(tokens[0], 'custom-token');
+      ReactTestUtils.findRenderedDOMComponentWithClass(tokens[0], 'typeahead-token');
+      ReactTestUtils.findRenderedDOMComponentWithClass(tokens[0], 'custom-token');
     });
 
     context('onKeyDown', function() {
       it('should bind to key events on the input', function(done) {
-        var component = TestUtils.renderIntoDocument(<Tokenizer
-          options={ BEATLES }
-          onKeyDown={ function(e) {
-              assert.equal(e.keyCode, 87);
-              done();
+        var component = ReactTestUtils.renderIntoDocument(
+          <Tokenizer
+            options={ BEATLES }
+            onKeyDown={ function(e) {
+                assert.equal(e.keyCode, 87);
+                done();
+              }
             }
-          }
-        />);
+          />
+        );
         var input = ReactDOM.findDOMNode(component.refs.typeahead.refs.entry);
-        TestUtils.Simulate.keyDown(input, { keyCode: 87 });
+        ReactTestUtils.Simulate.keyDown(input, { keyCode: 87 });
       });
     });
 
     context('onKeyUp', function() {
       it('should bind to key events on the input', function(done) {
-        var component = TestUtils.renderIntoDocument(<Tokenizer
-          options={ BEATLES }
-          onKeyUp={ function(e) {
-              assert.equal(e.keyCode, 87);
-              done();
+        var component = ReactTestUtils.renderIntoDocument(
+          <Tokenizer
+            options={ BEATLES }
+            onKeyUp={ function(e) {
+                assert.equal(e.keyCode, 87);
+                done();
+              }
             }
-          }
-        />);
+          />
+        );
 
         var input = ReactDOM.findDOMNode(component.refs.typeahead.refs.entry);
-        TestUtils.Simulate.keyUp(input, { keyCode: 87 });
+        ReactTestUtils.Simulate.keyUp(input, { keyCode: 87 });
       });
     });
 
     describe('props', function(){
       context('displayOption', function() {
         it('renders simple options verbatim when not specified', function() {
-          var component = TestUtils.renderIntoDocument(<Tokenizer
-            options={ BEATLES }
-          />);
+          var component = ReactTestUtils.renderIntoDocument(
+            <Tokenizer
+              options={ BEATLES }
+            />
+          );
           var results = simulateTokenInput(component, 'john');
           assert.equal(ReactDOM.findDOMNode(results[0]).textContent, 'John');
         });
 
         it('renders custom options when specified as a string', function() {
-          var component = TestUtils.renderIntoDocument(<Tokenizer
-            options={ BEATLES_COMPLEX }
-            filterOption='firstName'
-            displayOption='nameWithTitle'
-          />);
+          var component = ReactTestUtils.renderIntoDocument(
+            <Tokenizer
+              options={ BEATLES_COMPLEX }
+              filterOption='firstName'
+              displayOption='nameWithTitle'
+            />
+          );
           var results = simulateTokenInput(component, 'john');
           assert.equal(ReactDOM.findDOMNode(results[0]).textContent, 'John Winston Ono Lennon MBE');
         });
 
         it('renders custom options when specified as a function', function() {
-          var component = TestUtils.renderIntoDocument(<Tokenizer
-            options={ BEATLES_COMPLEX }
-            filterOption='firstName'
-            displayOption={ function(o, i) { return i + ' ' + o.firstName + ' ' + o.lastName; } }
-          />);
+          var component = ReactTestUtils.renderIntoDocument(
+            <Tokenizer
+              options={ BEATLES_COMPLEX }
+              filterOption='firstName'
+              displayOption={ function(o, i) { return i + ' ' + o.firstName + ' ' + o.lastName; } }
+            />
+          );
           var results = simulateTokenInput(component, 'john');
           assert.equal(ReactDOM.findDOMNode(results[0]).textContent, '0 John Lennon');
         });
@@ -175,8 +185,8 @@ describe('TypeaheadTokenizer Component', function() {
     it('should provide an exposed component function to get the selected tokens', function() {
       simulateTokenInput(this.component, 'o');
       var entry = this.component.refs.typeahead.refs.entry;
-      TestUtils.Simulate.keyDown(entry, { keyCode: Keyevent.DOM_VK_DOWN });
-      TestUtils.Simulate.keyDown(entry, { keyCode: Keyevent.DOM_VK_RETURN });
+      ReactTestUtils.Simulate.keyDown(entry, { keyCode: Keyevent.DOM_VK_DOWN });
+      ReactTestUtils.Simulate.keyDown(entry, { keyCode: Keyevent.DOM_VK_RETURN });
 
       assert.equal(this.component.getSelectedTokens().length, 1);
       assert.equal(this.component.getSelectedTokens()[0], "John");
@@ -187,9 +197,9 @@ describe('TypeaheadTokenizer Component', function() {
         var results = simulateTokenInput(this.component, 'o');
         var secondItem = ReactDOM.findDOMNode(results[1]).innerText;
         var node = this.component.refs.typeahead.refs.entry;
-        TestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_DOWN });
-        TestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_DOWN });
-        TestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_RETURN });
+        ReactTestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_DOWN });
+        ReactTestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_DOWN });
+        ReactTestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_RETURN });
         var Tokens = getTokens(this.component);
         assert.equal(Tokens[0].props.children, secondItem); // Poor Ringo
       });
@@ -198,10 +208,10 @@ describe('TypeaheadTokenizer Component', function() {
         var results = simulateTokenInput(this.component, 'o');
         var firstItem = ReactDOM.findDOMNode(results[0]).innerText;
         var node = this.component.refs.typeahead.refs.entry;
-        TestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_DOWN });
-        TestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_DOWN });
-        TestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_UP });
-        TestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_RETURN });
+        ReactTestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_DOWN });
+        ReactTestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_DOWN });
+        ReactTestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_UP });
+        ReactTestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_RETURN });
         var Tokens = getTokens(this.component);
         assert.equal(Tokens[0].props.children, firstItem);
       });
@@ -210,13 +220,13 @@ describe('TypeaheadTokenizer Component', function() {
         // Select two items
         simulateTokenInput(this.component, 'o');
         var entry = this.component.refs.typeahead.refs.entry;
-        TestUtils.Simulate.keyDown(entry, { keyCode: Keyevent.DOM_VK_DOWN });
-        TestUtils.Simulate.keyDown(entry, { keyCode: Keyevent.DOM_VK_RETURN });
+        ReactTestUtils.Simulate.keyDown(entry, { keyCode: Keyevent.DOM_VK_DOWN });
+        ReactTestUtils.Simulate.keyDown(entry, { keyCode: Keyevent.DOM_VK_RETURN });
 
         simulateTokenInput(this.component, 'o');
-        TestUtils.Simulate.keyDown(entry, { keyCode: Keyevent.DOM_VK_DOWN });
-        TestUtils.Simulate.keyDown(entry, { keyCode: Keyevent.DOM_VK_DOWN });
-        TestUtils.Simulate.keyDown(entry, { keyCode: Keyevent.DOM_VK_RETURN });
+        ReactTestUtils.Simulate.keyDown(entry, { keyCode: Keyevent.DOM_VK_DOWN });
+        ReactTestUtils.Simulate.keyDown(entry, { keyCode: Keyevent.DOM_VK_DOWN });
+        ReactTestUtils.Simulate.keyDown(entry, { keyCode: Keyevent.DOM_VK_RETURN });
 
         // re-set the typeahead entry
         var results = getTokens(this.component);
@@ -226,7 +236,7 @@ describe('TypeaheadTokenizer Component', function() {
         assert.equal(startLength, results.length);
 
         // Now press backspace with the empty entry
-        TestUtils.Simulate.keyDown(entry, { keyCode: Keyevent.DOM_VK_BACK_SPACE });
+        ReactTestUtils.Simulate.keyDown(entry, { keyCode: Keyevent.DOM_VK_BACK_SPACE });
         results = getTokens(this.component);
         assert.equal(results.length + 1, startLength);
       });
@@ -236,8 +246,8 @@ describe('TypeaheadTokenizer Component', function() {
         var startLength = getTokens(this.component).length;
 
         input.value = "hello";
-        TestUtils.Simulate.change(input);
-        TestUtils.Simulate.keyDown(input, { keyCode: Keyevent.DOM_VK_BACK_SPACE });
+        ReactTestUtils.Simulate.change(input);
+        ReactTestUtils.Simulate.keyDown(input, { keyCode: Keyevent.DOM_VK_BACK_SPACE });
 
         results = getTokens(this.component);
         assert.equal(startLength , results.length);
@@ -250,7 +260,7 @@ describe('TypeaheadTokenizer Component', function() {
         var tokens = getTokens(this.component);
 
         // Need to check Token list for props.children
-        TestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_TAB });
+        ReactTestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_TAB });
 
         var newTokens = getTokens(this.component)
         assert.equal(tokens.length, newTokens.length - 1);
@@ -261,9 +271,9 @@ describe('TypeaheadTokenizer Component', function() {
         var results = simulateTokenInput(this.component, 'o');
         var itemText = ReactDOM.findDOMNode(results[1]).innerText;
         var node = this.component.refs.typeahead.refs.entry;
-        TestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_DOWN });
-        TestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_DOWN });
-        TestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_TAB });
+        ReactTestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_DOWN });
+        ReactTestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_DOWN });
+        ReactTestUtils.Simulate.keyDown(node, { keyCode: Keyevent.DOM_VK_TAB });
         var tokens = getTokens(this.component);
         assert.equal(tokens[tokens.length - 1].props.children, itemText);
       });
@@ -280,7 +290,7 @@ describe('TypeaheadTokenizer Component', function() {
       this.tokenRemove = this.sinon.spy();
 
 
-      this.component = TestUtils.renderIntoDocument(
+      this.component = ReactTestUtils.renderIntoDocument(
         <Tokenizer
           options={BEATLES}
           onTokenAdd={this.tokenAdd}
@@ -331,8 +341,8 @@ describe('TypeaheadTokenizer Component', function() {
       var input = this.component.refs.typeahead.refs.entry;
       var tokens = getTokens(this.component);
 
-      TestUtils.Simulate.keyDown(input, {keyCode: Keyevent.DOM_VK_DOWN})
-      TestUtils.Simulate.keyDown(input, {keyCode: Keyevent.DOM_VK_RETURN})
+      ReactTestUtils.Simulate.keyDown(input, {keyCode: Keyevent.DOM_VK_DOWN})
+      ReactTestUtils.Simulate.keyDown(input, {keyCode: Keyevent.DOM_VK_RETURN})
       tokens = getTokens(this.component)
       assert(tokens.length == 1)
       assert.equal("abzz", tokens[0].props.children);
@@ -343,8 +353,8 @@ describe('TypeaheadTokenizer Component', function() {
       var input = this.component.refs.typeahead.refs.entry;
       var tokens = getTokens(this.component);
 
-      TestUtils.Simulate.keyDown(input, {keyCode: Keyevent.DOM_VK_DOWN})
-      TestUtils.Simulate.keyDown(input, {keyCode: Keyevent.DOM_VK_RETURN})
+      ReactTestUtils.Simulate.keyDown(input, {keyCode: Keyevent.DOM_VK_DOWN})
+      ReactTestUtils.Simulate.keyDown(input, {keyCode: Keyevent.DOM_VK_RETURN})
 
       assert(this.tokenAdd.called);
       assert(this.tokenAdd.calledWith( "abzz" ))
@@ -355,15 +365,15 @@ describe('TypeaheadTokenizer Component', function() {
       var input = this.component.refs.typeahead.refs.entry;
       var tokens = getTokens(this.component);
 
-      TestUtils.Simulate.keyDown(input, {keyCode: Keyevent.DOM_VK_DOWN})
-      TestUtils.Simulate.keyDown(input, {keyCode: Keyevent.DOM_VK_RETURN})
+      ReactTestUtils.Simulate.keyDown(input, {keyCode: Keyevent.DOM_VK_DOWN})
+      ReactTestUtils.Simulate.keyDown(input, {keyCode: Keyevent.DOM_VK_RETURN})
 
       assert(this.tokenAdd.called);
       assert(this.tokenAdd.calledWith( "abzz" ))
 
       tokens = getTokens(this.component);
-      var tokenClose = TestUtils.scryRenderedDOMComponentsWithTag(tokens[0], "a")[0];
-      TestUtils.Simulate.click(tokenClose);
+      var tokenClose = ReactTestUtils.scryRenderedDOMComponentsWithTag(tokens[0], "a")[0];
+      ReactTestUtils.Simulate.click(tokenClose);
       assert(this.tokenRemove.called);
       assert(this.tokenRemove.calledWith("abzz"));
     })
@@ -372,7 +382,7 @@ describe('TypeaheadTokenizer Component', function() {
       var results = simulateTokenInput(this.component, "abzz");
       var input = this.component.refs.typeahead.refs.entry;
       var tokens = getTokens(this.component);
-      TestUtils.Simulate.keyDown(input, {keyCode: Keyevent.DOM_VK_TAB})
+      ReactTestUtils.Simulate.keyDown(input, {keyCode: Keyevent.DOM_VK_TAB})
 
       var newTokens = getTokens(this.component)
       // behavior is custom token is selected
@@ -385,7 +395,7 @@ describe('TypeaheadTokenizer Component', function() {
       var results = simulateTokenInput(this.component, "abz");
       var input = this.component.refs.typeahead.refs.entry;
       var tokens = getTokens(this.component);
-      TestUtils.Simulate.keyDown(input, {keyCode: Keyevent.DOM_VK_TAB})
+      ReactTestUtils.Simulate.keyDown(input, {keyCode: Keyevent.DOM_VK_TAB})
 
       var newTokens = getTokens(this.component)
       // behavior is custom token is selected
@@ -396,13 +406,45 @@ describe('TypeaheadTokenizer Component', function() {
 
   describe('defaultClassNames', function() {
     it('should remove default classNames when this prop is specified and false', function() {
-      var component = TestUtils.renderIntoDocument(<Tokenizer
-        options={ BEATLES }
-        defaultClassNames={false}
-      />);
+      var component = ReactTestUtils.renderIntoDocument(
+        <Tokenizer
+          options={ BEATLES }
+          defaultClassNames={false}
+        />
+      );
 
       assert.notOk(ReactDOM.findDOMNode(component).classList.contains("tokenizer-typeahead"));
       assert.equal(false, component.refs.typeahead.props.defaultClassNames);
+    });
+  });
+
+  describe('Click on option', function() {
+    var node, component;
+    var onBlur = function() {
+      component.setState("wasRerendered", true);
+    }
+
+    beforeEach(function(){
+      this.sinon = sinon.sandbox.create();
+      node = document.createElement('div');
+      component = ReactDOM.render(
+        <Tokenizer
+          options={ BEATLES }
+          onBlur={ onBlur }
+        />,
+        node
+      );
+    });
+    afterEach(function() {
+      this.sinon.restore();
+    });
+
+    it('should update the state of the component when the value prop is changed', function() {
+      // this.sinon.spy(onBlur);
+      simulateTextInput(component.refs.typeahead, "Pau");
+      ReactTestUtils.Simulate.click(component.refs.typeahead.refs.sel, {});
+      assert.equal(component.state.wasRerendered, true);
+      // assert.equal(onBlur.calledOnce, true);
     });
   });
 });
