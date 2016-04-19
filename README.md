@@ -68,12 +68,6 @@ Type: `String`
 
 A default value used when the component has no value. If it matches any options a option list will show.
 
-#### props.value
-
-Type: `String`
-
-Specify a value for the text input.
-
 #### props.maxVisible
 
 Type: `Number`
@@ -88,18 +82,6 @@ Allowed Keys: `input`, `results`, `listItem`, `listAnchor`, `hover`
 An object containing custom class names for child elements. Useful for
 integrating with 3rd party UI kits.
 
-#### props.placeholder
-
-Type: `String`
-
-Placeholder text for the typeahead input.
-
-#### props.disabled
-
-Type: `Boolean`
-
-Set to `true` to add disable attribute in the `<input>` or `<textarea>` element
-
 #### props.textarea
 
 Type: `Boolean`
@@ -110,37 +92,11 @@ Set to `true` to use a `<textarea>` element rather than an `<input>` element
 
 Type: `Object`
 
-Props to pass directly to the `<input>` element.
+Props to pass directly to the typeahead input.
 
-#### props.onKeyDown
+This is where you would set things such as `disabled`, `onBlur`,`onFocus`, `onKeyDown`, `onKeyPress`, `onKeyUp`, `placeholder`, `value`, etc.
 
-Type: `Function`
-
-Event handler for the `keyDown` event on the typeahead input.
-
-#### props.onKeyPress
-
-Type: `Function`
-
-Event handler for the `keyPress` event on the typeahead input.
-
-#### props.onKeyUp
-
-Type: `Function`
-
-Event handler for the `keyUp` event on the typeahead input.
-
-#### props.onBlur
-
-Type: `Function`
-
-Event handler for the `blur` event on the typeahead input.
-
-#### props.onFocus
-
-Type: `Function`
-
-Event handler for the `focus` event on the typeahead input.
+The individual props that are standard `input` and `textarea` attributes as well as event attributes have been deprecated in version 2.0.  As such `inputProps` should be used instead.
 
 #### props.onOptionSelected
 
@@ -251,53 +207,11 @@ Allowed Keys: `input`, `results`, `listItem`, `listAnchor`, `typeahead`
 An object containing custom class names for child elements. Useful for
 integrating with 3rd party UI kits.
 
-#### props.placeholder
-
-Type: `String`
-
-Placeholder text for the typeahead input.
-
-#### props.disabled
-
-Type: `Boolean`
-
-Set to `true` to add disable attribute in the `<input>` or `<textarea>` element
-
 #### props.inputProps
 
 Type: `Object`
 
 Props to pass directly to the `<input>` element.
-
-#### props.onKeyDown
-
-Type: `Function`
-
-Event handler for the `keyDown` event on the typeahead input.
-
-#### props.onKeyPress
-
-Type: `Function`
-
-Event handler for the `keyPress` event on the typeahead input.
-
-#### props.onKeyUp
-
-Type: `Function`
-
-Event handler for the `keyUp` event on the typeahead input.
-
-#### props.onBlur
-
-Type: `Function`
-
-Event handler for the `blur` event on the typeahead input.
-
-#### props.onFocus
-
-Type: `Function`
-
-Event handler for the `focus` event on the typeahead input.
 
 #### props.defaultSelected
 

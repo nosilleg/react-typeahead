@@ -30,16 +30,9 @@ var TypeaheadTokenizer = React.createClass({
     allowCustomValues: React.PropTypes.number,
     defaultSelected: React.PropTypes.array,
     defaultValue: React.PropTypes.string,
-    placeholder: React.PropTypes.string,
-    disabled: React.PropTypes.bool,
     inputProps: React.PropTypes.object,
     onTokenRemove: React.PropTypes.func,
-    onKeyDown: React.PropTypes.func,
-    onKeyPress: React.PropTypes.func,
-    onKeyUp: React.PropTypes.func,
     onTokenAdd: React.PropTypes.func,
-    onFocus: React.PropTypes.func,
-    onBlur: React.PropTypes.func,
     filterOption: React.PropTypes.oneOfType([
       React.PropTypes.string,
       React.PropTypes.func
@@ -53,7 +46,15 @@ var TypeaheadTokenizer = React.createClass({
       React.PropTypes.func
     ]),
     maxVisible: React.PropTypes.number,
-    defaultClassNames: React.PropTypes.bool
+    defaultClassNames: React.PropTypes.bool,
+    // Deprecated props in version 2.0
+    disabled: React.PropTypes.bool,
+    onBlur: React.PropTypes.func,
+    onFocus: React.PropTypes.func,
+    onKeyPress: React.PropTypes.func,
+    onKeyUp: React.PropTypes.func,
+    placeholder: React.PropTypes.string,
+    onKeyDown: React.PropTypes.func
   },
 
   getInitialState: function() {
@@ -72,20 +73,22 @@ var TypeaheadTokenizer = React.createClass({
       customClasses: {},
       allowCustomValues: 0,
       defaultValue: "",
-      placeholder: "",
-      disabled: false,
       inputProps: {},
       defaultClassNames: true,
       filterOption: null,
-      displayOption: function(token){ return token },
       formInputOption: null,
-      onKeyDown: function(event) {},
+      displayOption: function(token){return token },
+      onTokenAdd: function() {},
+      onTokenRemove: function() {},
+      // Deprecated props in version 2.0
+      disabled: false,
+      onBlur: function(event) {},
+      onFocus: function(event) {},
       onKeyPress: function(event) {},
       onKeyUp: function(event) {},
-      onFocus: function(event) {},
-      onBlur: function(event) {},
-      onTokenAdd: function() {},
-      onTokenRemove: function() {}
+      placeholder: "",
+
+      onKeyDown: function(event) {}
     };
   },
 
@@ -138,7 +141,7 @@ var TypeaheadTokenizer = React.createClass({
     if (event.keyCode === KeyEvent.DOM_VK_BACK_SPACE) {
       return this._handleBackspace(event);
     }
-    this.props.onKeyDown(event);
+    this.props.onKeyDown(event); // TODO: deal with inputProps
   },
 
   _handleBackspace: function(event){
@@ -195,30 +198,40 @@ var TypeaheadTokenizer = React.createClass({
     tokenizerClasses[this.props.className] = !!this.props.className;
     var tokenizerClassList = classNames(tokenizerClasses)
 
+    var inputProps = Object.assign(
+      {},
+      {
+        disabled: this.props.disabled,
+        onBlur: this.props.onBlur,
+        onFocus: this.props.onFocus,
+        onKeyPress: this.props.onKeyPress,
+        onKeyUp: this.props.onKeyUp,
+        placeholder: this.props.placeholder,
+        value: this.props.value
+      },
+      this.props.inputProps,
+      {
+        onChange: this._onChange,
+        onKeyDown: this._onKeyDown,
+        value: this.state.value
+      }
+    );
+
     return (
       <div className={tokenizerClassList}>
         { this._renderTokens() }
         <Typeahead ref="typeahead"
           className={classList}
-          placeholder={this.props.placeholder}
-          disabled={this.props.disabled}
-          inputProps={this.props.inputProps}
+          inputProps={inputProps}
           allowCustomValues={this.props.allowCustomValues}
           customClasses={this.props.customClasses}
           options={this._getOptionsForTypeahead()}
           defaultValue={this.props.defaultValue}
           maxVisible={this.props.maxVisible}
-          onChange={this._onChange}
           onOptionSelected={this._addTokenForValue}
-          onKeyDown={this._onKeyDown}
-          onKeyPress={this.props.onKeyPress}
-          onKeyUp={this.props.onKeyUp}
-          onFocus={this.props.onFocus}
-          onBlur={this.props.onBlur}
           displayOption={this.props.displayOption}
           defaultClassNames={this.props.defaultClassNames}
-          filterOption={this.props.filterOption}
-          value={this.state.value} />
+          filterOption={this.props.filterOption} />
       </div>
     );
   }
